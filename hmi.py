@@ -47,7 +47,7 @@ class App(customtkinter.CTk):
         # Set the labels and title for the graph
         self.graph_axes.set_xlabel('Time')
         self.graph_axes.set_ylabel('DP')
-        self.graph_axes.set_title('DP vs. Time')
+        self.graph_axes.set_title('The effect of Ferric Chloride & Flow on DP')
         
         # Display the graph within the app's grid layout
         self.graph_canvas = FigureCanvasTkAgg(self.graph_figure, master=self)
@@ -68,7 +68,7 @@ class App(customtkinter.CTk):
         self.slider_1.grid(row=1, column=0, rowspan=5, padx=(0,10), pady=(10, 10), sticky="ns")
         self.progressbar_1 = customtkinter.CTkProgressBar(self.slider_progressbar_frame, orientation="vertical")
         self.progressbar_1.grid(row=1, column=0, rowspan=5, padx=(100, 0), pady=(10, 10), sticky="ns")
-        self.controls1_label = customtkinter.CTkLabel(self.slider_progressbar_frame, text="Ferric", anchor="s", font=("Arial", 14, "bold"), bg_color='transparent')
+        self.controls1_label = customtkinter.CTkLabel(self.slider_progressbar_frame, text="Ferric Chloride", anchor="s", font=("Arial", 14, "bold"), bg_color='transparent')
         self.controls1_label.grid(row=6, column=0, padx=(30,0), pady=(10, 10))
 
 
@@ -84,7 +84,7 @@ class App(customtkinter.CTk):
         self.scrollable_frame.grid(row=1, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
         log_entries = [
-        ("Flow", "Ferric", "DP"),
+        ("Flow", "Ferric Chloride", "DP"),
         (10, 5, 50),
         (15, 7, 55),
         (12, 6, 52),
@@ -123,7 +123,7 @@ class App(customtkinter.CTk):
         # Set the labels and title for the graph
         self.graph_axes.set_xlabel('Time')
         self.graph_axes.set_ylabel('DP')
-        self.graph_axes.set_title('DP vs. Time')
+        self.graph_axes.set_title('The effect of Ferric Chloride & Flow on DP')
 
         # Redraw the graph canvas
         self.graph_canvas.draw()
@@ -131,11 +131,11 @@ class App(customtkinter.CTk):
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
-        self.update_graph()
+        
 
-    def change_scaling_event(self, new_scaling: str):
-        new_scaling_float = int(new_scaling.replace("%", "")) / 100
-        customtkinter.set_widget_scaling(new_scaling_float)
+    # def change_scaling_event(self, new_scaling: str):
+    #     new_scaling_float = int(new_scaling.replace("%", "")) / 100
+    #     customtkinter.set_widget_scaling(new_scaling_float)
 
     def sidebar_button_event(self):
         print("sidebar_button click")

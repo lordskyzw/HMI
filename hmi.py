@@ -47,7 +47,7 @@ class App(customtkinter.CTk):
         # Set the labels and title for the graph
         self.graph_axes.set_xlabel('Time')
         self.graph_axes.set_ylabel('DP')
-        self.graph_axes.set_title('The effect of Ferric Chloride & Flow on DP')
+        self.graph_axes.set_title(label='The effect of Ferric Chloride & Flow on DP', loc='center', fontdict={'fontsize': 10, 'fontweight': 'bold'})
         
         # Display the graph within the app's grid layout
         self.graph_canvas = FigureCanvasTkAgg(self.graph_figure, master=self)
@@ -123,7 +123,7 @@ class App(customtkinter.CTk):
         # Set the labels and title for the graph
         self.graph_axes.set_xlabel('Time')
         self.graph_axes.set_ylabel('DP')
-        self.graph_axes.set_title('The effect of Ferric Chloride & Flow on DP')
+        self.graph_axes.set_title(label='The effect of Ferric Chloride & Flow on DP', loc='center', fontdict={'fontsize': 10, 'fontweight': 'bold'})
 
         # Redraw the graph canvas
         self.graph_canvas.draw()

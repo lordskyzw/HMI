@@ -1,1 +1,1 @@
-replace the scrollable frame with a logs box
+integrate with a pygame animation to show the water flowing into the Solids Contact Clarifier and then flowing out

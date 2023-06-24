@@ -99,6 +99,20 @@ class App(customtkinter.CTk):
         
         self.slider_1.configure(command=self.update_graph)
         self.slider_2.configure(command=self.update_graph)
+        # Create the clarifier widget
+        self.clarifier_frame = customtkinter.CTkFrame(self, bg_color="white", border_width=2, border_color="gray40")
+        self.clarifier_frame.grid(row=2, column=1, padx=(20, 20), pady=(20, 20), sticky="nsew")
+
+        self.clarifier_label = customtkinter.CTkLabel(
+            self.clarifier_frame,
+            text="Clarifier",
+            anchor="n",
+            font=("Arial", 14, "bold"),
+            bg_color='transparent',
+        )
+        self.clarifier_label.grid(row=0, column=0, padx=50, pady=(10, 0))
+
+        # Add the clarifier content (e.g., text, images, etc.) as needed
         
         #self.textbox.insert("0.0", "CTkTextbox\n\n" + "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\n" * 20)
         

@@ -85,13 +85,13 @@ class App(customtkinter.CTk):
         self.scrollable_frame = customtkinter.CTkScrollableFrame(self, label_text="Input Logs")
         self.scrollable_frame.grid(row=1, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
-        log_entries = [
+        self.log_entries = [
         ("Flow", "Ferric Chloride", "DP"),
         (10, 5, 50),
         (15, 7, 55),
         (12, 6, 52)
         ]
-        for i, log_entry in enumerate(log_entries):
+        for i, log_entry in enumerate(self.log_entries):
             for j, value in enumerate(log_entry):
                 log_label = customtkinter.CTkLabel(self.scrollable_frame, text=str(value))
                 log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
@@ -122,6 +122,8 @@ class App(customtkinter.CTk):
 
     def update_graph(self, value):
 
+        self.scrollable_frame.clear_frame()
+
         # Get the values from the sliders
         slider1_value = self.slider_1.get()
         slider2_value = self.slider_2.get()
@@ -131,21 +133,13 @@ class App(customtkinter.CTk):
         dp = [10 * slider1_value, 20 * slider2_value, 15 * slider1_value, 25 * slider2_value, 18 * slider1_value]
 
         # Update the log entries
-        log_entries = [
-            ("Flow", "Ferric Chloride", "DP"),
-            (slider2_value, slider1_value, dp[0]),
-            (slider2_value, slider1_value, dp[1]),
-            (slider2_value, slider1_value, dp[2]),
-            (slider2_value, slider1_value, dp[3]),
-            (slider2_value, slider1_value, dp[4]),
-            # Add more log entries here as needed
-        ]
+        self.log_entries.append((slider1_value, slider2_value, dp[-1]))
 
 
-        self.scrollable_frame.clear_frame()
+        
 
 
-        for i, log_entry in enumerate(log_entries):
+        for i, log_entry in enumerate(self.log_entries):
             for j, value in enumerate(log_entry):
                 log_label = customtkinter.CTkLabel(self.scrollable_frame, text=str(value))
                 log_label.grid(row=i, column=j, padx=10, pady=(0, 10))

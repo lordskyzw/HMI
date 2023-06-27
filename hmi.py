@@ -66,7 +66,7 @@ class App(customtkinter.CTk):
         
 
         #Slider 1 is for Ferric Chloride
-        self.slider_1 = customtkinter.CTkSlider(self.slider_progressbar_frame, orientation="vertical")
+        self.slider_1 = customtkinter.CTkSlider(self.slider_progressbar_frame, orientation="vertical", from_=10, to=50, number_of_steps=80)
         self.slider_1.grid(row=1, column=0, rowspan=5, padx=(0,10), pady=(10, 10), sticky="ns")
         self.progressbar_1 = customtkinter.CTkProgressBar(self.slider_progressbar_frame, orientation="vertical")
         self.progressbar_1.grid(row=1, column=0, rowspan=5, padx=(100, 0), pady=(10, 10), sticky="ns")
@@ -74,7 +74,7 @@ class App(customtkinter.CTk):
         self.controls1_label.grid(row=6, column=0, padx=(30,0), pady=(10, 10))
 
         #Slider 2 is for Flow
-        self.slider_2 = customtkinter.CTkSlider(self.slider_progressbar_frame, orientation="vertical")
+        self.slider_2 = customtkinter.CTkSlider(self.slider_progressbar_frame, orientation="vertical", from_=100, to=400, number_of_steps=300)
         self.slider_2.grid(row=1, column=2, rowspan=5, padx=(10, 10), pady=(10, 10), sticky="ns")
         self.progressbar_2 = customtkinter.CTkProgressBar(self.slider_progressbar_frame, orientation="vertical")
         self.progressbar_2.grid(row=1, column=3, rowspan=5, padx=(10, 20), pady=(10, 10), sticky="ns")
@@ -113,13 +113,7 @@ class App(customtkinter.CTk):
         )
         self.clarifier_label.grid(row=0, column=0, padx=50, pady=(10, 0))
 
-        # Add the clarifier content (e.g., text, images, etc.) as needed
-        
-
-    def open_input_dialog_event(self):
-        dialog = customtkinter.CTkInputDialog(text="Type in a number:", title="CTkInputDialog")
-        print("CTkInputDialog:", dialog.get_input())
-
+     
     def update_graph(self, value):
 
         self.scrollable_frame.clear_frame()
@@ -134,11 +128,6 @@ class App(customtkinter.CTk):
 
         # Update the log entries
         self.log_entries.append((slider1_value, slider2_value, dp[-1]))
-
-
-        
-
-
         for i, log_entry in enumerate(self.log_entries):
             for j, value in enumerate(log_entry):
                 log_label = customtkinter.CTkLabel(self.scrollable_frame, text=str(value))

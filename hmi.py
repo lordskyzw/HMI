@@ -64,6 +64,8 @@ class App(customtkinter.CTk):
         self.controls_label = customtkinter.CTkLabel(self.slider_progressbar_frame, text="CONTROLS", anchor="n", font=("Arial", 14, "bold"), bg_color='transparent')
         self.controls_label.grid(row=0, column=1, padx=50, pady=(10, 0))
         
+
+        #Slider 1 is for Ferric Chloride
         self.slider_1 = customtkinter.CTkSlider(self.slider_progressbar_frame, orientation="vertical")
         self.slider_1.grid(row=1, column=0, rowspan=5, padx=(0,10), pady=(10, 10), sticky="ns")
         self.progressbar_1 = customtkinter.CTkProgressBar(self.slider_progressbar_frame, orientation="vertical")
@@ -71,7 +73,7 @@ class App(customtkinter.CTk):
         self.controls1_label = customtkinter.CTkLabel(self.slider_progressbar_frame, text="Ferric Chloride", anchor="s", font=("Arial", 14, "bold"), bg_color='transparent')
         self.controls1_label.grid(row=6, column=0, padx=(30,0), pady=(10, 10))
 
-
+        #Slider 2 is for Flow
         self.slider_2 = customtkinter.CTkSlider(self.slider_progressbar_frame, orientation="vertical")
         self.slider_2.grid(row=1, column=2, rowspan=5, padx=(10, 10), pady=(10, 10), sticky="ns")
         self.progressbar_2 = customtkinter.CTkProgressBar(self.slider_progressbar_frame, orientation="vertical")
@@ -87,8 +89,7 @@ class App(customtkinter.CTk):
         ("Flow", "Ferric Chloride", "DP"),
         (10, 5, 50),
         (15, 7, 55),
-        (12, 6, 52),
-        # Add more log entries here as needed
+        (12, 6, 52)
         ]
         for i, log_entry in enumerate(log_entries):
             for j, value in enumerate(log_entry):
@@ -120,13 +121,35 @@ class App(customtkinter.CTk):
         print("CTkInputDialog:", dialog.get_input())
 
     def update_graph(self, value):
+
         # Get the values from the sliders
         slider1_value = self.slider_1.get()
         slider2_value = self.slider_2.get()
 
-        # Update the graph data with the new values
+        # Update the graph data with the new values THIS IS WHERE THE INPUT FROM THE NEURAL NETWORK WILL GO
         time = [1, 2, 3, 4, 5]
         dp = [10 * slider1_value, 20 * slider2_value, 15 * slider1_value, 25 * slider2_value, 18 * slider1_value]
+
+        # Update the log entries
+        log_entries = [
+            ("Flow", "Ferric Chloride", "DP"),
+            (slider2_value, slider1_value, dp[0]),
+            (slider2_value, slider1_value, dp[1]),
+            (slider2_value, slider1_value, dp[2]),
+            (slider2_value, slider1_value, dp[3]),
+            (slider2_value, slider1_value, dp[4]),
+            # Add more log entries here as needed
+        ]
+
+
+        self.scrollable_frame.clear_frame()
+
+
+        for i, log_entry in enumerate(log_entries):
+            for j, value in enumerate(log_entry):
+                log_label = customtkinter.CTkLabel(self.scrollable_frame, text=str(value))
+                log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+        
 
         # Clear the previous graph and plot the updated data
         self.graph_axes.clear()
@@ -143,11 +166,7 @@ class App(customtkinter.CTk):
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
-        
 
-    # def change_scaling_event(self, new_scaling: str):
-    #     new_scaling_float = int(new_scaling.replace("%", "")) / 100
-    #     customtkinter.set_widget_scaling(new_scaling_float)
 
     def sidebar_button_event(self):
         print("sidebar_button click")

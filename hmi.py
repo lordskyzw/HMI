@@ -1,6 +1,31 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import customtkinter
+from tensorflow.keras.models import load_model 
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
+import pandas as pd
+
+# Load the saved model
+neuralnet = load_model('neuralnet.h5')
+
+data = pd.read_excel('lab/pretreatment.xlsx', sheet_name='Sheet2')
+
+# Split the data into predictors (X) and target variable (y)
+X = data[['Turbidity', 'Flow', 'Ferric']]
+y = data['DP']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale the features to a specific range (e.g., between 0 and 1)
+scaler = MinMaxScaler(feature_range=(0, 4), copy=True)
+scaler.feature_names = ['Turbidity', 'Flow', 'Ferric']  # Specify your actual feature names
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("dark-blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -38,13 +63,15 @@ class App(customtkinter.CTk):
         self.graph_axes = self.graph_figure.add_subplot(111)
 
         # Generate sample data for the graph (replace with your own data)
-        time = [1, 2, 3, 4, 5]
-        dp = [10, 20, 15, 25, 18]
+        self.dp = [0]
+        self.time = list(range(1))
+        
 
-        # Plot the DP against time
-        self.graph_axes.plot(time, dp)
+        # Plot the self.DP against self.time
+        self.graph_axes.plot(self.time, self.dp)
 
         # Set the labels and title for the graph
+        self.line, = self.graph_axes.plot(self.time, self.dp)
         self.graph_axes.set_xlabel('Time')
         self.graph_axes.set_ylabel('DP')
         self.graph_axes.set_title(label='The effect of Ferric Chloride & Flow on DP', loc='center', fontdict={'fontsize': 10, 'fontweight': 'bold'})
@@ -113,8 +140,14 @@ class App(customtkinter.CTk):
         )
         self.clarifier_label.grid(row=0, column=0, padx=50, pady=(10, 0))
 
+        self.update_graph()
+
+    #def start_time_simulation(self):
+         
+
      
-    def update_graph(self, value):
+    def update_graph(self, _=None):
+        '''This should always increase the time and then update the graph per second'''
 
         self.scrollable_frame.clear_frame()
 
@@ -122,29 +155,40 @@ class App(customtkinter.CTk):
         slider1_value = self.slider_1.get()
         slider2_value = self.slider_2.get()
 
-        # Update the graph data with the new values THIS IS WHERE THE INPUT FROM THE NEURAL NETWORK WILL GO
-        time = [1, 2, 3, 4, 5]
-        dp = [10 * slider1_value, 20 * slider2_value, 15 * slider1_value, 25 * slider2_value, 18 * slider1_value]
+        # Create an array with the slider values
+        input_values = np.array([[slider1_value, slider2_value, 0]])  # Assuming the third input feature is 0
+
+        # Scale the input values using the same scaler used during training
+        input_values_scaled = scaler.transform(input_values)
+
+        # Perform prediction using the loaded neural network model
+        prediction = neuralnet.predict(input_values_scaled)
+
+        # Update the graph data with the new prediction
+        self.dp.append(prediction[0][0])
+        self.time.append(self.time[-1] + 1)  # Increment the time value
 
         # Update the log entries
-        self.log_entries.append((slider1_value, slider2_value, dp[-1]))
+        self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
         for i, log_entry in enumerate(self.log_entries):
             for j, value in enumerate(log_entry):
                 log_label = customtkinter.CTkLabel(self.scrollable_frame, text=str(value))
                 log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-        
 
         # Clear the previous graph and plot the updated data
         self.graph_axes.clear()
-        self.graph_axes.plot(time, dp)
-
-        # Set the labels and title for the graph
+        self.graph_axes.plot(self.time, self.dp)
         self.graph_axes.set_xlabel('Time')
         self.graph_axes.set_ylabel('DP')
+        self.line.set_data(self.time, self.dp)  # Update the line data with the updated dp and time
+        self.graph_axes.set_xlim(0, len(self.dp))
+        self.graph_axes.set_ylim(-1, max(self.dp) + 2)
         self.graph_axes.set_title(label='The effect of Ferric Chloride & Flow on DP', loc='center', fontdict={'fontsize': 10, 'fontweight': 'bold'})
 
         # Redraw the graph canvas
         self.graph_canvas.draw()
+        self.after(2000, self.update_graph)
+
 
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
@@ -153,6 +197,10 @@ class App(customtkinter.CTk):
 
     def sidebar_button_event(self):
         print("sidebar_button click")
+
+    
+
+        
 
 
 if __name__ == "__main__":

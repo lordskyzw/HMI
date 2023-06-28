@@ -1,2 +1,5 @@
 matplotlib
 customtkinter
+tensorflow
+numpy
+scikit-learn

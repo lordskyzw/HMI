@@ -1,1 +1,0 @@
-integrate with a pygame animation to show the water flowing into the Solids Contact Clarifier and then flowing out

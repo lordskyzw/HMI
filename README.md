@@ -18,7 +18,7 @@ git clone https://github.com/lordskyzw/hmi.git
 
 
 2. Navigate to the project directory:
-cd dp-prediction
+cd hmi
 
 
 3. Install the required dependencies:
@@ -35,9 +35,9 @@ pip install -r requirements.txt
 
 2. Train the neural network model:
 
-- Run the script 'train_model.py' to train the model using the dataset.
+- Run all the cells in the `modelbuilding` notebooks to train the model using the dataset.
 - Adjust the model parameters (e.g., number of epochs, batch size) as needed.
 
 3. Run the prediction application:
 
-- Execute the script 'dp_prediction.py' to launch the DP prediction application.
+- Execute the script 'hmi.py' to launch the DP prediction application.

@@ -1,4 +1,4 @@
-# DP Prediction Application
+# HUMAN MACHINE INTERFACE
 
 This is a Python application that predicts the DP (Differential Pressure) value based on the values of Flow and Ferric. The application utilizes a trained neural network model and provides a graphical representation of the DP values over time.
 
@@ -27,17 +27,12 @@ pip install -r requirements.txt
 
 ## Usage
 
-1. Prepare the dataset:
 
-- Create an Excel file named 'pretreatment.xlsx' with a sheet named 'Sheet2'.
-- Add the following columns to the sheet: 'Turbidity', 'Flow', 'Ferric', and 'DP'.
-- Populate the dataset with the corresponding values for each column.
-
-2. Train the neural network model:
+1. Train the neural network model:
 
 - Run all the cells in the `modelbuilding` notebooks to train the model using the dataset.
 - Adjust the model parameters (e.g., number of epochs, batch size) as needed.
 
-3. Run the prediction application:
+2. Run the prediction application:
 
 - Execute the script 'hmi.py' to launch the DP prediction application.

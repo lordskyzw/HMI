@@ -50,6 +50,11 @@ class App(customtkinter.CTk):
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Human Machine Interface", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+
+        # create stop button
+        self.stop_button = customtkinter.CTkButton(self.sidebar_frame, text="Stop", command=self.stop_button_event)
+        self.stop_button.grid(row=3, column=0, padx=20, pady=(10, 0))
+        self.is_paused = False
         
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
         self.appearance_mode_label.grid(row=1, column=0, padx=20, pady=(10, 0))
@@ -144,10 +149,24 @@ class App(customtkinter.CTk):
 
     #def start_time_simulation(self):
          
+    def stop_button_event(self):
+        # Toggle the value of the is_paused flag variable
+        self.is_paused = not self.is_paused
 
-     
+        # Update the text of the stop button based on the current state
+        if self.is_paused:
+            self.stop_button.configure(text="Continue")
+        else:
+            self.stop_button.configure(text="Stop")
+            if not self.is_paused:
+                self.update_graph()
+
+            
     def update_graph(self, _=None):
+        
         '''This should always increase the time and then update the graph per second'''
+        if self.is_paused:
+            return
 
         self.scrollable_frame.clear_frame()
 
@@ -182,7 +201,7 @@ class App(customtkinter.CTk):
         self.graph_axes.set_ylabel('DP')
         self.line.set_data(self.time, self.dp)  # Update the line data with the updated dp and time
         self.graph_axes.set_xlim(0, len(self.dp))
-        self.graph_axes.set_ylim(-1, max(self.dp) + 2)
+        self.graph_axes.set_ylim(0, max(self.dp) + 1)
         self.graph_axes.set_title(label='The effect of Ferric Chloride & Flow on DP', loc='center', fontdict={'fontsize': 10, 'fontweight': 'bold'})
 
         # Redraw the graph canvas

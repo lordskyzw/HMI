@@ -255,6 +255,9 @@ class App(customtkinter.CTk):
         # Perform prediction using the loaded neural network model
         prediction = neuralnet.predict(input_values_scaled)
 
+        #reduce to 3 significant figures
+        prediction = np.around(prediction, 3)
+
         # Update the graph data with the new prediction
         self.dp.append(prediction[0][0])
         self.time.append(self.time[-1] + 1)  # Increment the time value

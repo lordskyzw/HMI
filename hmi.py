@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import customtkinter
-from tensorflow.keras.models import load_model 
+from tensorflow.keras.models import load_model #type: ignore
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import cv2
 from PIL import Image, ImageTk
+from moviepy.editor import VideoFileClip
 
 
 # Load the saved model
@@ -143,18 +144,13 @@ class App(customtkinter.CTk):
         
         self.slider_1.configure(command=self.update_graph)
         self.slider_2.configure(command=self.update_graph)
+
+
+
         # Create the clarifier widget
         self.clarifier_frame = customtkinter.CTkFrame(self, bg_color="white", border_width=2, border_color="gray40")
-        self.clarifier_frame.grid(row=2, column=1, columnspan=2, padx=(20, 0), pady=(20, 20), sticky="nsew")
+        self.clarifier_frame.grid(row=2, column=1, columnspan=2, padx=(20, 0), pady=(10, 0), sticky="nsew")
 
-        self.clarifier_label = customtkinter.CTkLabel(
-            self.clarifier_frame,
-            text="Clarifier",
-            anchor="n",
-            font=("Arial", 14, "bold"),
-            bg_color='transparent',
-        )
-        self.clarifier_label.grid(row=0, column=0, padx=50, pady=(10, 0))
 
         # Load the video
         self.video = cv2.VideoCapture("assets/loop.mp4")
@@ -162,61 +158,38 @@ class App(customtkinter.CTk):
         _, self.frame = self.video.read()
 
         # Create a label to display the video frames
-        self.video_label = customtkinter.CTkLabel(self.clarifier_frame)
+        self.video_label = customtkinter.CTkLabel(self.clarifier_frame, width=self.clarifier_frame.winfo_width(), height=self.clarifier_frame.winfo_height())
         self.video_label.grid(row=0, column=0)
 
         # Start the video playback
         self.play_video()
+        self.update_graph()
 
-    # def play_video(self):
-    #     _, self.frame = self.video.read()
-    #     if self.frame is not None:
-    #         # Convert the video frame to RGB format
-    #         frame_rgb = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
 
-    #         # Resize the frame to fit the clarifier frame
-    #         frame_resized = cv2.resize(frame_rgb, (self.clarifier_frame.winfo_width(), self.clarifier_frame.winfo_height()))
 
-    #         # Convert the resized frame to a PIL Image
-    #         image = Image.fromarray(frame_resized)
 
-    #         # Convert the PIL Image to a Tkinter PhotoImage
-    #         photo_image = ImageTk.PhotoImage(image)
-    #         # Create a CTkImage from the PhotoImage
-    #         ctk_image = CTkImage.from_photo_image(photo_image)
 
-    #         # Update the video label with the new frame
-    #         self.video_label.configure(image=ctk_image)
-    #         self.video_label.image = ctk_image
 
-    #     else:
-    #         # Reset the video capture to the beginning
-    #         self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
-
-    #     # Schedule the next frame update
-    #     self.after(30, self.play_video)
 
     def play_video(self):
-        ret, frame = self.video.read()
-        if ret:
-            # Convert the frame to PIL Image format
-            image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        video_path = "assets/loop.mp4"
+        video_clip = VideoFileClip(video_path)
+        duration = video_clip.duration
 
-            # Resize the image to fit the label
-            image = image.resize((400, 300))
+        # Create a Tkinter label to display the video frames
+        label = customtkinter.CTkLabel(self.clarifier_frame)
+        label.grid(row=0, column=0)
 
-            # Create a CTkImage from the PIL Image
-            ctk_image = customtkinter.CTkImage(image)
+        if self.is_paused:
+            return
 
-            # Update the video label with the new frame
-            self.video_label.configure(image=ctk_image)
-            self.video_label.image = ctk_image
-
-        # if self.is_playing:
-        #     self.after(30, self.play_video)
-
-
-        self.update_graph()
+        # Play the video by updating the label with new frames
+        for t in range(int(duration)):
+            frame = video_clip.get_frame(t)
+            image = ImageTk.PhotoImage(image=Image.fromarray(frame))
+            label.configure(image=image)
+            label.image = image
+            label.update()
 
     #def start_time_simulation(self):
          
@@ -295,8 +268,6 @@ class App(customtkinter.CTk):
     
 
         
-
-
 if __name__ == "__main__":
     app = App()
     app.mainloop()

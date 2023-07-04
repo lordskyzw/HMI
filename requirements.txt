@@ -3,3 +3,4 @@ customtkinter
 tensorflow
 numpy
 scikit-learn
+Pillow

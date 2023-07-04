@@ -5,3 +5,5 @@ numpy
 scikit-learn
 Pillow
 moviepy
+pygame
+imageio

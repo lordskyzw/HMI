@@ -212,8 +212,8 @@ class App(customtkinter.CTk):
             self.video_label.configure(image=ctk_image)
             self.video_label.image = ctk_image
 
-        if self.is_playing:
-            self.after(30, self.play_video)
+        # if self.is_playing:
+        #     self.after(30, self.play_video)
 
 
         self.update_graph()

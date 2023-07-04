@@ -6,6 +6,9 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import pandas as pd
+import cv2
+from PIL import Image, ImageTk
+
 
 # Load the saved model
 neuralnet = load_model('neuralnet.h5')
@@ -21,10 +24,18 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Scale the features to a specific range (e.g., between 0 and 1)
 scaler = MinMaxScaler(feature_range=(0, 4), copy=True)
-scaler.feature_names = ['Turbidity', 'Flow', 'Ferric']  # Specify your actual feature names
+# Fit the scaler to the training data
+scaler.fit(X_train)
 
-X_train_scaled = scaler.fit_transform(X_train)
+# Transform the training and testing data using the fitted scaler
+X_train_scaled = scaler.transform(X_train)
 X_test_scaled = scaler.transform(X_test)
+
+# scaler.feature_names = ['Turbidity', 'Flow', 'Ferric']  # Specify your actual feature names
+
+
+# X_train_scaled = scaler.fit_transform(X_train)
+# X_test_scaled = scaler.transform(X_test)
 
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
@@ -145,6 +156,66 @@ class App(customtkinter.CTk):
         )
         self.clarifier_label.grid(row=0, column=0, padx=50, pady=(10, 0))
 
+        # Load the video
+        self.video = cv2.VideoCapture("assets/loop.mp4")
+        self.is_playing = True
+        _, self.frame = self.video.read()
+
+        # Create a label to display the video frames
+        self.video_label = customtkinter.CTkLabel(self.clarifier_frame)
+        self.video_label.grid(row=0, column=0)
+
+        # Start the video playback
+        self.play_video()
+
+    # def play_video(self):
+    #     _, self.frame = self.video.read()
+    #     if self.frame is not None:
+    #         # Convert the video frame to RGB format
+    #         frame_rgb = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+
+    #         # Resize the frame to fit the clarifier frame
+    #         frame_resized = cv2.resize(frame_rgb, (self.clarifier_frame.winfo_width(), self.clarifier_frame.winfo_height()))
+
+    #         # Convert the resized frame to a PIL Image
+    #         image = Image.fromarray(frame_resized)
+
+    #         # Convert the PIL Image to a Tkinter PhotoImage
+    #         photo_image = ImageTk.PhotoImage(image)
+    #         # Create a CTkImage from the PhotoImage
+    #         ctk_image = CTkImage.from_photo_image(photo_image)
+
+    #         # Update the video label with the new frame
+    #         self.video_label.configure(image=ctk_image)
+    #         self.video_label.image = ctk_image
+
+    #     else:
+    #         # Reset the video capture to the beginning
+    #         self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+    #     # Schedule the next frame update
+    #     self.after(30, self.play_video)
+
+    def play_video(self):
+        ret, frame = self.video.read()
+        if ret:
+            # Convert the frame to PIL Image format
+            image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+            # Resize the image to fit the label
+            image = image.resize((400, 300))
+
+            # Create a CTkImage from the PIL Image
+            ctk_image = customtkinter.CTkImage(image)
+
+            # Update the video label with the new frame
+            self.video_label.configure(image=ctk_image)
+            self.video_label.image = ctk_image
+
+        if self.is_playing:
+            self.after(30, self.play_video)
+
+
         self.update_graph()
 
     #def start_time_simulation(self):
@@ -160,6 +231,7 @@ class App(customtkinter.CTk):
             self.stop_button.configure(text="Stop")
             if not self.is_paused:
                 self.update_graph()
+                self.play_video()
 
             
     def update_graph(self, _=None):

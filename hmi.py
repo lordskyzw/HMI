@@ -63,71 +63,61 @@ class App(customtkinter.CTk):
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Human Machine Interface", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-        # create stop button
-        self.stop_button = customtkinter.CTkButton(self.sidebar_frame, text="Stop", command=self.stop_button_event)
-        self.stop_button.grid(row=3, column=0, padx=20, pady=(10, 0))
-        self.is_paused = False
-        
+        #apperance mode and the widgets
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
         self.appearance_mode_label.grid(row=1, column=0, padx=20, pady=(10, 0))
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"],
                                                                        command=self.change_appearance_mode_event)
         self.appearance_mode_optionemenu.grid(row=2, column=0, padx=20, pady=(10, 10))
-        
 
+        def copilot():
+            print("switch toggled, current value:", copilot_flag.get())
+
+        copilot_flag = customtkinter.StringVar(value="off")
+        copilot_switch = customtkinter.CTkSwitch(self.sidebar_frame, text="Neural Net Control", command=copilot,
+                                        variable=copilot_flag, onvalue="on", offvalue="off")
+        copilot_switch.grid(row=1, column=0, padx=20, pady=(10, 0))
+
+        # create stop button
+        self.stop_button = customtkinter.CTkButton(self.sidebar_frame, text="Stop", command=self.stop_button_event)
+        self.stop_button.grid(row=3, column=0, padx=20, pady=(10, 0))
+        self.is_paused = False
         # Create the graph figure and axes
         self.graph_figure = plt.figure(figsize=(8, 6))
         self.graph_axes = self.graph_figure.add_subplot(111)
-
         # Generate sample data for the graph (replace with your own data)
         self.dp = [0]
         self.time = list(range(1))
         
-
         # Plot the self.DP against self.time
         self.graph_axes.plot(self.time, self.dp)
-
         # Set the labels and title for the graph
         self.line, = self.graph_axes.plot(self.time, self.dp)
         self.graph_axes.set_xlabel('Time')
         self.graph_axes.set_ylabel('DP')
         self.graph_axes.set_title(label='The effect of Ferric Chloride & Flow on DP', loc='center', fontdict={'fontsize': 10, 'fontweight': 'bold'})
-        
         # Display the graph within the app's grid layout
         self.graph_canvas = FigureCanvasTkAgg(self.graph_figure, master=self)
         self.graph_canvas.draw()
         self.graph_canvas.get_tk_widget().grid(row=0, column=1, rowspan=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
-
-
-        # create slider and progressbar frame
+        # create slider_progressbar_frame
         self.slider_progressbar_frame = customtkinter.CTkFrame(self, bg_color="gray10", border_width=2, border_color="gray10", corner_radius=10)
         self.slider_progressbar_frame.grid(row=2, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew")
-        #self.slider_progressbar_frame.grid_columnconfigure(0, weight=1)
+        self.slider_progressbar_frame.grid_columnconfigure((0,1), weight=1)
         self.slider_progressbar_frame.grid_rowconfigure(5, weight=1)
-
-        self.controls_label = customtkinter.CTkLabel(self.slider_progressbar_frame, text="CONTROLS", anchor="n", font=("Arial", 14, "bold"), bg_color='transparent')
-        self.controls_label.grid(row=0, column=1, padx=50, pady=(10, 0))
-        
-
         #Slider 1 is for Ferric Chloride
         self.slider_1 = customtkinter.CTkSlider(self.slider_progressbar_frame, orientation="vertical", from_=10, to=50, number_of_steps=80)
         self.slider_1.grid(row=1, column=0, rowspan=5, padx=(0,10), pady=(10, 10), sticky="ns")
-        self.progressbar_1 = customtkinter.CTkProgressBar(self.slider_progressbar_frame, orientation="vertical")
-        self.progressbar_1.grid(row=1, column=0, rowspan=5, padx=(100, 0), pady=(10, 10), sticky="ns")
         self.controls1_label = customtkinter.CTkLabel(self.slider_progressbar_frame, text="Ferric Chloride", anchor="s", font=("Arial", 14, "bold"), bg_color='transparent')
-        self.controls1_label.grid(row=6, column=0, padx=(30,0), pady=(10, 10))
-
+        self.controls1_label.grid(row=6, column=0, padx=(10,10), pady=(0, 10))
         #Slider 2 is for Flow
         self.slider_2 = customtkinter.CTkSlider(self.slider_progressbar_frame, orientation="vertical", from_=100, to=400, number_of_steps=300)
-        self.slider_2.grid(row=1, column=2, rowspan=5, padx=(10, 10), pady=(10, 10), sticky="ns")
-        self.progressbar_2 = customtkinter.CTkProgressBar(self.slider_progressbar_frame, orientation="vertical")
-        self.progressbar_2.grid(row=1, column=3, rowspan=5, padx=(10, 20), pady=(10, 10), sticky="ns")
+        self.slider_2.grid(row=1, column=1, rowspan=5, padx=(10, 10), pady=(10, 10), sticky="ns")
         self.controls2_label = customtkinter.CTkLabel(self.slider_progressbar_frame, text="Flow", anchor="s", font=("Arial", 14, "bold"), bg_color='transparent')
-        self.controls2_label.grid(row=6, column=2, padx=(50,0), pady=(10, 10))
-
+        self.controls2_label.grid(row=6, column=1, padx=(10,10), pady=(0, 10))
         # create scrollable frame
-        self.scrollable_frame = customtkinter.CTkScrollableFrame(self, label_text="Input Logs")
-        self.scrollable_frame.grid(row=1, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
+        self.scrollable_frame = customtkinter.CTkScrollableFrame(self, label_text="History Log")
+        self.scrollable_frame.grid(row=1, column=2, padx=(0, 0), pady=(5, 5), sticky="n")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
         self.log_entries = [
         ("Flow", "Ferric Chloride", "DP"),
@@ -144,32 +134,17 @@ class App(customtkinter.CTk):
         
         self.slider_1.configure(command=self.update_graph)
         self.slider_2.configure(command=self.update_graph)
-
-
-
         # Create the clarifier widget
         self.clarifier_frame = customtkinter.CTkFrame(self, bg_color="white", border_width=2, border_color="gray40")
-        self.clarifier_frame.grid(row=2, column=1, columnspan=2, padx=(20, 0), pady=(10, 0), sticky="nsew")
-
-
+        self.clarifier_frame.grid(row=2, column=1, columnspan=2, rowspan=2, padx=(20, 0), pady=(10, 0), sticky="nsew")
         # Load the video
         self.video = cv2.VideoCapture("assets/loop.mp4")
         self.is_playing = True
         _, self.frame = self.video.read()
-
-        # Create a label to display the video frames
-        self.video_label = customtkinter.CTkLabel(self.clarifier_frame, width=self.clarifier_frame.winfo_width(), height=self.clarifier_frame.winfo_height())
-        self.video_label.grid(row=0, column=0)
-
         # Start the video playback
-        self.play_video()
+        if not self.is_paused:
+            self.play_video()
         self.update_graph()
-
-
-
-
-
-
 
     def play_video(self):
         video_path = "assets/loop.mp4"
@@ -177,16 +152,17 @@ class App(customtkinter.CTk):
         duration = video_clip.duration
 
         # Create a Tkinter label to display the video frames
-        label = customtkinter.CTkLabel(self.clarifier_frame)
+        label = customtkinter.CTkLabel(self.clarifier_frame,text="", height=self.clarifier_frame.winfo_height(), width=self.clarifier_frame.winfo_width())
         label.grid(row=0, column=0)
 
         if self.is_paused:
+            video_clip.close()
             return
 
         # Play the video by updating the label with new frames
         for t in range(int(duration)):
             frame = video_clip.get_frame(t)
-            image = ImageTk.PhotoImage(image=Image.fromarray(frame))
+            image = ImageTk.PhotoImage(image=Image.fromarray(frame), height=label.winfo_height(), width=label.winfo_width())
             label.configure(image=image)
             label.image = image
             label.update()
@@ -213,7 +189,7 @@ class App(customtkinter.CTk):
         if self.is_paused:
             return
 
-        self.scrollable_frame.clear_frame()
+        #self.scrollable_frame.clear_frame()
 
         # Get the values from the sliders
         slider1_value = self.slider_1.get()
@@ -221,13 +197,10 @@ class App(customtkinter.CTk):
 
         # Create an array with the slider values
         input_values = np.array([[slider1_value, slider2_value, 0]])  # Assuming the third input feature is 0
-
         # Scale the input values using the same scaler used during training
         input_values_scaled = scaler.transform(input_values)
-
         # Perform prediction using the loaded neural network model
         prediction = neuralnet.predict(input_values_scaled)
-
         #reduce to 3 significant figures
         prediction = np.around(prediction, 3)
 
@@ -241,6 +214,8 @@ class App(customtkinter.CTk):
             for j, value in enumerate(log_entry):
                 log_label = customtkinter.CTkLabel(self.scrollable_frame, text=str(value))
                 log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+        self.scrollable_frame.scroll_to_bottom()
+        #self.scrollable_frame._set_scroll_increments()
 
         # Clear the previous graph and plot the updated data
         self.graph_axes.clear()
@@ -254,7 +229,7 @@ class App(customtkinter.CTk):
 
         # Redraw the graph canvas
         self.graph_canvas.draw()
-        self.after(2000, self.update_graph)
+        self.after(5000, self.update_graph)
 
 
 

@@ -1,0 +1,7 @@
+if the self.copilot_flag == 'ON':
+    collect the values of the sliders
+    collect the latest flow, ferric chloride and dp values from the log_entries array
+    detect_changed slider(s) value between the 2 sliders by comparing the current slider values with the last entries in the log_entries array 
+    if none, do not change anything
+    else:
+    change the value of the none-changed slider to a value which maintains the dp value as before

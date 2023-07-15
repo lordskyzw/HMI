@@ -84,20 +84,18 @@ class App(customtkinter.CTk):
             command=self.change_appearance_mode_event,
         )
         self.appearance_mode_optionemenu.grid(row=2, column=0, padx=20, pady=(10, 10))
+        self.copilot_flag = customtkinter.StringVar(value="off")
 
-        def copilot():
-            print("switch toggled, current value:", copilot_flag.get())
-
-        copilot_flag = customtkinter.StringVar(value="off")
-        copilot_switch = customtkinter.CTkSwitch(
+        self.copilot_switch = customtkinter.CTkSwitch(
             self.sidebar_frame,
             text="Predictive Control",
-            command=copilot,
-            variable=copilot_flag,
+            command=self.copilot,
+            variable=self.copilot_flag,
+            progress_color="green",
             onvalue="on",
             offvalue="off",
         )
-        copilot_switch.grid(row=1, column=0, padx=20, pady=(10, 0))
+        self.copilot_switch.grid(row=1, column=0, padx=20, pady=(10, 0))
 
         # create stop button
         self.stop_button = customtkinter.CTkButton(
@@ -105,12 +103,14 @@ class App(customtkinter.CTk):
         )
         self.stop_button.grid(row=3, column=0, padx=20, pady=(10, 0))
         self.is_paused = False
-        # Create the graph figure and axes
-        self.graph_figure = plt.figure(figsize=(8, 6))
+
+        ############################################################ INITIAL GRAPH ####################################################
+        self.graph_figure = plt.figure(figsize=(8, 7))
         self.graph_axes = self.graph_figure.add_subplot(111)
         # Generate sample data for the graph (replace with your own data)
         self.dp = [0]
         self.time = list(range(1))
+        self.last_input = {"flow": None, "ferric_chloride": None}
 
         # Plot the self.DP against self.time
         self.graph_axes.plot(self.time, self.dp)
@@ -129,20 +129,24 @@ class App(customtkinter.CTk):
         self.graph_canvas.get_tk_widget().grid(
             row=0, column=1, rowspan=2, padx=(20, 0), pady=(20, 20), sticky="nsew"
         )
+        ############################################################ END OF INITIAL GRAPH ###############################################################
+
+        ################################################## SLIDERS CONFIGURATION #######################################################
+        ################################### Slider 1 is for Ferric Chloride ###############################################
         # create slider_progressbar_frame
         self.slider_progressbar_frame = customtkinter.CTkFrame(
             self,
             bg_color="gray10",
             border_width=2,
             border_color="gray10",
-            corner_radius=10,
+            corner_radius=0,
         )
         self.slider_progressbar_frame.grid(
-            row=2, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew"
+            row=1, rowspan=2, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew"
         )
         self.slider_progressbar_frame.grid_columnconfigure((0, 1), weight=1)
         self.slider_progressbar_frame.grid_rowconfigure(5, weight=1)
-        # Slider 1 is for Ferric Chloride
+
         self.slider_1 = customtkinter.CTkSlider(
             self.slider_progressbar_frame,
             orientation="vertical",
@@ -161,7 +165,7 @@ class App(customtkinter.CTk):
             bg_color="transparent",
         )
         self.controls1_label.grid(row=6, column=0, padx=(10, 10), pady=(0, 10))
-        # Slider 2 is for Flow
+        ########################################### Slider 2 is for Flow     ########################################################
         self.slider_2 = customtkinter.CTkSlider(
             self.slider_progressbar_frame,
             orientation="vertical",
@@ -180,6 +184,11 @@ class App(customtkinter.CTk):
             bg_color="transparent",
         )
         self.controls2_label.grid(row=6, column=1, padx=(10, 10), pady=(0, 10))
+        self.slider_1.configure(command=self.slider_command)
+        self.slider_2.configure(command=self.slider_command)
+
+        ###################################################### END OF SLIDER CONFIGURATION ############################################
+
         # create scrollable frame
         self.scrollable_frame = customtkinter.CTkScrollableFrame(
             self, label_text="History Log"
@@ -202,64 +211,39 @@ class App(customtkinter.CTk):
                 log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
 
         self.scrollable_frame.scroll_to_bottom()
-
         self.appearance_mode_optionemenu.set("System")
 
-        self.slider_1.configure(command=self.update_graph)
-        self.slider_2.configure(command=self.update_graph)
-        # Create the clarifier widget
         self.clarifier_frame = customtkinter.CTkFrame(
             self, bg_color="white", border_width=2, border_color="gray40"
         )
-        self.clarifier_frame.grid(
-            row=2,
-            column=1,
-            columnspan=2,
-            rowspan=2,
-            padx=(20, 0),
-            pady=(10, 0),
-            sticky="nsew",
-        )
-        # Load the video
-        self.video = cv2.VideoCapture("assets/loop.mp4")
-        self.is_playing = True
-        _, self.frame = self.video.read()
-        # Start the video playback
-        if not self.is_paused:
-            self.play_video()
-        self.update_graph()
 
-    def play_video(self):
-        video_path = "assets/loop.mp4"
-        video_clip = VideoFileClip(video_path)
-        duration = video_clip.duration
+        self.run()
 
-        # Create a Tkinter label to display the video frames
-        label = customtkinter.CTkLabel(
-            self.clarifier_frame,
-            text="",
-            height=self.clarifier_frame.winfo_height(),
-            width=self.clarifier_frame.winfo_width(),
-        )
-        label.grid(row=0, column=0)
-
+    # CREATE THE MAINLOOP FUNCTION WHICH CHECKS IF PAUSED AND THEN CHECKS IF COPILOT IS ON OR OFF BEFORE CHOOSING WHICH METHOD TO CALL
+    def run(self):
         if self.is_paused:
-            video_clip.close()
             return
+        else:
+            if self.copilot_flag.get() == "on":
+                self.predictive_control()
+            elif self.copilot_flag.get() == "off":
+                self.update_graph()
 
-        # Play the video by updating the label with new frames
-        for t in range(int(duration)):
-            frame = video_clip.get_frame(t)
-            image = ImageTk.PhotoImage(
-                image=Image.fromarray(frame),
-                height=label.winfo_height(),
-                width=label.winfo_width(),
+        self.after(2000, self.run)
+
+    def copilot(self):
+        if self.copilot_flag.get() == "on":
+            print("switch toggled, current value: {}".format(self.copilot_flag.get()))
+            print("the last value for FLOW is:{}".format(self.last_input["flow"]))
+            print(
+                "the last value for FERRIC CHLORIDE:{}".format(
+                    self.last_input["ferric_chloride"]
+                )
             )
-            label.configure(image=image)
-            label.image = image
-            label.update()
-
-    # def start_time_simulation(self):
+            self.predictive_control()
+        elif self.copilot_flag.get() == "off":
+            print("switch toggled, current value: off")
+            self.update_graph()
 
     def stop_button_event(self):
         # Toggle the value of the is_paused flag variable
@@ -270,72 +254,100 @@ class App(customtkinter.CTk):
             self.stop_button.configure(text="Continue")
         else:
             self.stop_button.configure(text="Stop")
-            if not self.is_paused:
-                self.update_graph()
-                self.play_video()
+            self.run()
+            # if not self.is_paused:
+            #     self.update_graph()
+
+    def slider_command(self, _=None):
+        if self.copilot_flag.get() == "on":
+            self.predictive_control()
+        else:
+            self.update_graph()
+
+    def predictive_control(self, _=None):
+        """this enables the autopilot feature. When it is called, it:
+        1) checks for the changed slider
+        2) compansate for that change by regulating the unchanged slider"""
 
     def update_graph(self, _=None):
         """This should always increase the time and then update the graph per second"""
         if self.is_paused:
             return
 
-        # self.scrollable_frame.clear_frame()
+        if self.copilot_flag.get() == "on":
+            self.predictive_control()
+            return
+        else:
+            slider1_value = self.slider_1.get()
+            slider2_value = self.slider_2.get()
+            # Check if the current values are different from the last ones
+            # if (
+            #     self.last_input["flow"] != slider2_value
+            #     or self.last_input["ferric_chloride"] != slider1_value
+            # ):
+            # update the last_inputs dictionary to hold the current inputs
+            self.last_input["flow"] = slider2_value
+            self.last_input["ferric_chloride"] = slider1_value
 
-        # Get the values from the sliders
-        slider1_value = self.slider_1.get()
-        slider2_value = self.slider_2.get()
+            ################# NEURAL NET OPERATIONS #######################################################
+            # Summary: is the engine which outputs a prediction from the neural network loaded
 
-        # Create an array with the slider values
-        input_values = np.array(
-            [[slider1_value, slider2_value, 0]]
-        )  # Assuming the third input feature is 0
-        # Scale the input values using the same scaler used during training
-        input_values_scaled = scaler.transform(input_values)
-        # Perform prediction using the loaded neural network model
-        prediction = neuralnet.predict(input_values_scaled)
-        # reduce to 3 significant figures
-        prediction = np.around(prediction, 3)
+            # Create an array with the slider values
+            input_values = np.array(
+                [[slider1_value, slider2_value, 0]]
+            )  # Assuming the third input feature is 0
+            # Scale the input values using the same scaler used during training
+            input_values_scaled = scaler.transform(input_values)
+            # Perform prediction using the loaded neural network model
+            prediction = neuralnet.predict(input_values_scaled)
+            # reduce to 3 significant figures
+            prediction = np.around(prediction, 3)
 
-        # Update the graph data with the new prediction
-        self.dp.append(prediction[0][0])
-        self.time.append(self.time[-1] + 1)  # Increment the time value
+            #################### END OF NEURAL NET OPERATIONS #################################################
 
-        # Update the log entries
-        self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
-        for i, log_entry in enumerate(self.log_entries):
-            for j, value in enumerate(log_entry):
-                log_label = customtkinter.CTkLabel(
-                    self.scrollable_frame, text=str(value)
-                )
-                log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-        self.scrollable_frame.scroll_to_bottom()
-        # self.scrollable_frame._set_scroll_increments()
+            ################################# Updating the screens ###########################################################
+            self.dp.append(prediction[0][0])
+            self.time.append(self.time[-1] + 1)  # Increment the time value
 
-        # Clear the previous graph and plot the updated data
-        self.graph_axes.clear()
-        self.graph_axes.plot(self.time, self.dp)
-        self.graph_axes.set_xlabel("Time")
-        self.graph_axes.set_ylabel("DP")
-        self.line.set_data(
-            self.time, self.dp
-        )  # Update the line data with the updated dp and time
-        self.graph_axes.set_xlim(0, len(self.dp))
-        self.graph_axes.set_ylim(0, max(self.dp) + 1)
-        self.graph_axes.set_title(
-            label="The effect of Ferric Chloride & Flow on DP",
-            loc="center",
-            fontdict={"fontsize": 10, "fontweight": "bold"},
-        )
+            # Update the log entries
+            self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
+            for i, log_entry in enumerate(self.log_entries):
+                for j, value in enumerate(log_entry):
+                    log_label = customtkinter.CTkLabel(
+                        self.scrollable_frame, text=str(value)
+                    )
+                    log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+                    self.scrollable_frame.scroll_to_bottom()
 
-        # Redraw the graph canvas
-        self.graph_canvas.draw()
-        self.after(5000, self.update_graph)
+            ####################################################### GRAPHING OPERATIONS ##################################################
+
+            # Clear the previous graph and plot the updated data
+            self.graph_axes.clear()
+            self.graph_axes.plot(self.time, self.dp)
+            self.graph_axes.set_xlabel("Time")
+            self.graph_axes.set_ylabel("DP")
+            self.line.set_data(
+                self.time, self.dp
+            )  # Update the line data with the updated dp and time
+            self.graph_axes.set_xlim(0, len(self.dp))
+            self.graph_axes.set_ylim(0, max(self.dp) + 1)
+            self.graph_axes.set_title(
+                label="The effect of Ferric Chloride & Flow on DP",
+                loc="center",
+                fontdict={"fontsize": 10, "fontweight": "bold"},
+            )
+
+            # Redraw the graph canvas
+            self.graph_canvas.draw()
+            if self.copilot_flag == "on":
+                self.predictive_control()
+                return
+            elif self.copilot_flag == "off":
+                self.after(2000, self.update_graph)
+                return
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
-
-    def sidebar_button_event(self):
-        print("sidebar_button click")
 
 
 if __name__ == "__main__":

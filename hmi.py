@@ -6,9 +6,6 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import pandas as pd
-import cv2
-from PIL import Image, ImageTk
-from moviepy.editor import VideoFileClip
 
 
 # Load the saved model
@@ -268,6 +265,73 @@ class App(customtkinter.CTk):
         """this enables the autopilot feature. When it is called, it:
         1) checks for the changed slider
         2) compansate for that change by regulating the unchanged slider"""
+        if self.is_paused:
+            return
+
+        slider1_value = self.slider_1.get()
+        slider2_value = self.slider_2.get()
+        # Check if the current values are different from the last ones
+        if (
+            self.last_input["flow"] != slider2_value
+            or self.last_input["ferric_chloride"] != slider1_value
+        ):
+            # Algorithm for compensating the unchanged slider
+            if slider1_value != self.last_input["ferric_chloride"]:
+                # Slider 1 (Ferric Chloride) value has changed
+                # Implement the compensation logic here
+                # Example: Adjust Slider 2 (Flow) based on the change in Slider 1
+                self.last_input["ferric_chloride"] = slider1_value
+
+            elif slider2_value != self.last_input["flow"]:
+                # Slider 2 (Flow) value has changed
+                # Implement the compensation logic here
+                # Example: Adjust Slider 1 (Ferric Chloride) based on the change in Slider 2
+                self.last_input["flow"] = slider2_value
+
+        else:
+            """no change occured so just plot graph with last loop values"""
+
+            ################################# Updating the screens ###########################################################
+            self.dp.append(self.dp[-1])
+            self.time.append(self.time[-1] + 1)  # Increment the time value
+
+            # Update the log entries
+            self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
+            for i, log_entry in enumerate(self.log_entries):
+                for j, value in enumerate(log_entry):
+                    log_label = customtkinter.CTkLabel(
+                        self.scrollable_frame, text=str(value)
+                    )
+                    log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+                    self.scrollable_frame.scroll_to_bottom()
+
+            ####################################################### GRAPHING OPERATIONS ##################################################
+
+            # Clear the previous graph and plot the updated data
+            self.graph_axes.clear()
+            self.graph_axes.plot(self.time, self.dp)
+            (self.line,) = self.graph_axes.plot(self.time, self.dp, color="red")
+            self.graph_axes.set_xlabel("Time")
+            self.graph_axes.set_ylabel("DP")
+            self.line.set_data(
+                self.time, self.dp
+            )  # Update the line data with the updated dp and time
+            self.graph_axes.set_xlim(0, len(self.dp))
+            self.graph_axes.set_ylim(0, max(self.dp) + 1)
+            self.graph_axes.set_title(
+                label="The effect of Ferric Chloride & Flow on DP",
+                loc="center",
+                fontdict={"fontsize": 10, "fontweight": "bold"},
+            )
+            self.graph_axes.patch.set_facecolor("lightgreen")
+            # Redraw the graph canvas
+            self.graph_canvas.draw()
+            if self.copilot_flag == "on":
+                self.after(2000, self.predictive_control)
+                return
+            elif self.copilot_flag == "off":
+                self.after(2000, self.update_graph)
+                return
 
     def update_graph(self, _=None):
         """This should always increase the time and then update the graph per second"""

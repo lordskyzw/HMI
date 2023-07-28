@@ -1,0 +1,4 @@
+I took the dataset and trained a neural net using that data
+I then used the nueral net to plot the data on the graph
+Using the neural net was optimum but it was cpu intensie.
+I then deduced the formula using the nueral net, All which can be found in newton.py

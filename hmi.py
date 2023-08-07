@@ -1,14 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import customtkinter
-import pandas as pd
 from newton import *
-
-# Read the data from the Excel file
-data = pd.read_excel(io="lab\\pretreatment.xlsx", sheet_name="Sheet2")
-data = data.drop("Unnamed: 0", axis=1)
-turbidity_column = data["Turbidity"]
-normalized_turbidity = 0
 
 
 customtkinter.set_appearance_mode(
@@ -81,7 +74,7 @@ class App(customtkinter.CTk):
         ############################################################ INITIAL GRAPH ####################################################
         self.graph_figure = plt.figure(figsize=(8, 7))
         self.graph_axes = self.graph_figure.add_subplot(111)
-        # Generate sample data for the graph (replace with your own data)
+        # Generate sample data for the graph
         self.dp = [0]
         self.time = list(range(1))
         self.last_input = {"flow": None, "ferric_chloride": None}
@@ -339,22 +332,22 @@ class App(customtkinter.CTk):
                 self.time.append(self.time[-1] + 1)  # Increment the time value
 
                 # Update the log entries
-                self.log_entries.append(
-                    (
-                        (
-                            slider1_value,
-                            round(slider2_system_response_value, ndigits=3),
-                            self.dp[-1],
-                        )
-                    )
-                )
-                for i, log_entry in enumerate(self.log_entries):
-                    for j, value in enumerate(log_entry):
-                        log_label = customtkinter.CTkLabel(
-                            self.scrollable_frame, text=str(value)
-                        )
-                        log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-                        self.scrollable_frame.scroll_to_bottom()
+                # self.log_entries.append(
+                #     (
+                #         (
+                #             slider1_value,
+                #             round(slider2_system_response_value, ndigits=3),
+                #             self.dp[-1],
+                #         )
+                #     )
+                # )
+                # for i, log_entry in enumerate(self.log_entries):
+                #     for j, value in enumerate(log_entry):
+                #         log_label = customtkinter.CTkLabel(
+                #             self.scrollable_frame, text=str(value)
+                #         )
+                #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+                #         self.scrollable_frame.scroll_to_bottom()
 
                 ####################################################### GRAPHING OPERATIONS ##################################################
 
@@ -439,14 +432,14 @@ class App(customtkinter.CTk):
                 self.time.append(self.time[-1] + 1)  # Increment the time value
 
                 # Update the log entries
-                self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
-                for i, log_entry in enumerate(self.log_entries):
-                    for j, value in enumerate(log_entry):
-                        log_label = customtkinter.CTkLabel(
-                            self.scrollable_frame, text=str(value)
-                        )
-                        log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-                        self.scrollable_frame.scroll_to_bottom()
+                # self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
+                # for i, log_entry in enumerate(self.log_entries):
+                #     for j, value in enumerate(log_entry):
+                #         log_label = customtkinter.CTkLabel(
+                #             self.scrollable_frame, text=str(value)
+                #         )
+                #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+                #         self.scrollable_frame.scroll_to_bottom()
 
                 ####################################################### GRAPHING OPERATIONS ##################################################
 
@@ -484,7 +477,7 @@ class App(customtkinter.CTk):
             main_equation(
                 flow=slider2_value,
                 ferric_chloride=slider1_value,
-                turbidity=random_turbidity(turbidity_column),
+                turbidity=random_turbidity(0.6),
             ),
             3,
         )
@@ -496,14 +489,14 @@ class App(customtkinter.CTk):
         self.time.append(self.time[-1] + 1)  # Increment the time value
 
         # Update the log entries
-        self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
-        for i, log_entry in enumerate(self.log_entries):
-            for j, value in enumerate(log_entry):
-                log_label = customtkinter.CTkLabel(
-                    self.scrollable_frame, text=str(value)
-                )
-                log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-                self.scrollable_frame.scroll_to_bottom()
+        # self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
+        # for i, log_entry in enumerate(self.log_entries):
+        #     for j, value in enumerate(log_entry):
+        #         log_label = customtkinter.CTkLabel(
+        #             self.scrollable_frame, text=str(value)
+        #         )
+        #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+        #         self.scrollable_frame.scroll_to_bottom()
 
         ####################################################### GRAPHING OPERATIONS ##################################################
 

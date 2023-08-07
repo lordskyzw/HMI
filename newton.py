@@ -15,11 +15,11 @@ def random_turbidity(arg):
     3) uses that number as the number of weights
     4) the weight number is then used in the sample function to generate a random turbidity value
     """
-    weights = arg.value_counts()
-    random_value = arg.sample(n=1, weights=weights)
-    random_value = random_value.to_list()
+    # weights = arg.value_counts()
+    # random_value = arg.sample(n=1, weights=weights)
+    # random_value = random_value.to_list()
 
-    return random_value[0]
+    return 0.6
 
 
 def main_equation(flow: float, ferric_chloride: float, turbidity: float):

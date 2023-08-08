@@ -222,32 +222,32 @@ class App(customtkinter.CTk):
         ###################################################### END OF SLIDER CONFIGURATION ############################################
 
         # create scrollable frame
-        self.scrollable_frame = customtkinter.CTkScrollableFrame(
-            self, label_text="History Log"
-        )
-        self.scrollable_frame.grid(
-            row=1, column=2, padx=(0, 0), pady=(5, 5), sticky="n"
-        )
-        self.scrollable_frame.grid_columnconfigure(0, weight=1)
-        self.log_entries = [
-            ("Ferric", "Flow", "DP"),
-            (10, 5, 50),
-            (15, 7, 55),
-            (12, 6, 52),
-        ]
-        for i, log_entry in enumerate(self.log_entries):
-            for j, value in enumerate(log_entry):
-                log_label = customtkinter.CTkLabel(
-                    self.scrollable_frame, text=str(value)
-                )
-                log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+        # self.scrollable_frame = customtkinter.CTkScrollableFrame(
+        #     self, label_text="History Log"
+        # )
+        # self.scrollable_frame.grid(
+        #     row=1, column=2, padx=(0, 0), pady=(5, 5), sticky="n"
+        # )
+        # self.scrollable_frame.grid_columnconfigure(0, weight=1)
+        # self.log_entries = [
+        #     ("Ferric", "Flow", "DP"),
+        #     (10, 5, 50),
+        #     (15, 7, 55),
+        #     (12, 6, 52),
+        # ]
+        # for i, log_entry in enumerate(self.log_entries):
+        #     for j, value in enumerate(log_entry):
+        #         log_label = customtkinter.CTkLabel(
+        #             self.scrollable_frame, text=str(value)
+        #         )
+        #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
 
-        self.scrollable_frame.scroll_to_bottom()
-        self.appearance_mode_optionemenu.set("System")
+        # self.scrollable_frame.scroll_to_bottom()
+        # self.appearance_mode_optionemenu.set("System")
 
-        self.clarifier_frame = customtkinter.CTkFrame(
-            self, bg_color="white", border_width=2, border_color="gray40"
-        )
+        # self.clarifier_frame = customtkinter.CTkFrame(
+        #     self, bg_color="white", border_width=2, border_color="gray40"
+        # )
 
         self.run()
 
@@ -383,20 +383,20 @@ class App(customtkinter.CTk):
                 self.time.append(self.time[-1] + 1)
 
                 # update log entries
-                self.log_entries.append(
-                    (
-                        round(slider1_system_response_value, ndigits=3),
-                        slider2_value,
-                        self.dp[-1],
-                    )
-                )
-                for i, log_entry in enumerate(self.log_entries):
-                    for j, value in enumerate(log_entry):
-                        log_label = customtkinter.CTkLabel(
-                            self.scrollable_frame, text=str(value)
-                        )
-                        log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-                        self.scrollable_frame.scroll_to_bottom()
+                # self.log_entries.append(
+                #     (
+                #         round(slider1_system_response_value, ndigits=3),
+                #         slider2_value,
+                #         self.dp[-1],
+                #     )
+                # )
+                # for i, log_entry in enumerate(self.log_entries):
+                #     for j, value in enumerate(log_entry):
+                #         log_label = customtkinter.CTkLabel(
+                #             self.scrollable_frame, text=str(value)
+                #         )
+                #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
+                #         self.scrollable_frame.scroll_to_bottom()
 
                 ####################################################### GRAPHING OPERATIONS ######################################################################################################### GRAPHING OPERATIONS ##################################################
 

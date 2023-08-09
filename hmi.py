@@ -16,6 +16,35 @@ def hide_label(label):
     label.destroy()
 
 
+class ToplevelWindow(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.geometry("400x300")
+        self.title("Accumulation Chart")
+        self.graph_figure = plt.figure(figsize=(8, 7))
+        self.graph_axes = self.graph_figure.add_subplot(111)
+        # Generate sample data for the graph
+        self.dp = [0]
+        self.time = list(range(1))
+        self.last_input = {"flow": None, "ferric_chloride": None}
+
+        # Plot the self.DP against self.time
+        self.graph_axes.plot(self.time, self.dp)
+        # Set the labels and title for the graph
+        (self.line,) = self.graph_axes.plot(self.time, self.dp)
+        self.graph_axes.set_xlabel("Time")
+        self.graph_axes.set_ylabel("DP")
+        self.graph_axes.set_title(
+            label="The effect of Ferric Chloride & Flow on DP",
+            loc="center",
+            fontdict={"fontsize": 10, "fontweight": "bold"},
+        )
+        # Display the graph within the app's grid layout
+        self.graph_canvas = FigureCanvasTkAgg(self.graph_figure, master=self)
+        self.graph_canvas.draw()
+        self.graph_canvas.get_tk_widget().pack()
+
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -39,7 +68,12 @@ class App(customtkinter.CTk):
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+        self.button_1 = customtkinter.CTkButton(
+            self, text="open Chart", command=self.open_toplevel
+        )
+        self.button_1.grid(padx=20, pady=20)
 
+        self.toplevel_window = None
         # apperance mode and the widgets
         self.appearance_mode_label = customtkinter.CTkLabel(
             self.sidebar_frame, text="Appearance Mode:", anchor="w"
@@ -250,6 +284,14 @@ class App(customtkinter.CTk):
         # )
 
         self.run()
+
+    def open_toplevel(self):
+        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+            self.toplevel_window = ToplevelWindow(
+                self
+            )  # create window if its None or destroyed
+        else:
+            self.toplevel_window.focus()  # if window exists focus it
 
     # CREATE THE MAINLOOP FUNCTION WHICH CHECKS IF PAUSED AND THEN CHECKS IF COPILOT IS ON OR OFF BEFORE CHOOSING WHICH METHOD TO CALL
     def run(self):

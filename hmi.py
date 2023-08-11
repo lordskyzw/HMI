@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib import animation
 import customtkinter
 from newton import *
+import numpy as np
 
 
 customtkinter.set_appearance_mode(
@@ -16,33 +18,66 @@ def hide_label(label):
     label.destroy()
 
 
+# Create a Tkinter window
 class ToplevelWindow(customtkinter.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.geometry("400x300")
-        self.title("Accumulation Chart")
-        self.graph_figure = plt.figure(figsize=(8, 7))
-        self.graph_axes = self.graph_figure.add_subplot(111)
-        # Generate sample data for the graph
-        self.dp = [0]
-        self.time = list(range(1))
-        self.last_input = {"flow": None, "ferric_chloride": None}
+        self.geometry("800x600")
+        self.title("Prediction Chart")
 
-        # Plot the self.DP against self.time
-        self.graph_axes.plot(self.time, self.dp)
-        # Set the labels and title for the graph
-        (self.line,) = self.graph_axes.plot(self.time, self.dp)
-        self.graph_axes.set_xlabel("Time")
-        self.graph_axes.set_ylabel("DP")
-        self.graph_axes.set_title(
-            label="The effect of Ferric Chloride & Flow on DP",
-            loc="center",
-            fontdict={"fontsize": 10, "fontweight": "bold"},
+        # Create a matplotlib figure and axis
+        self.figure, self.ax = plt.subplots()
+
+        # Set axis labels and title
+        self.ax.set_xlabel("Time (s)")
+        self.ax.set_ylabel("Value")
+        self.ax.set_title("DP Accumulation Prediction")
+
+        # Create a canvas to embed the matplotlib figure in the Tkinter window
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(fill="both", expand=True)
+
+        # Start dynamic growth animation
+        self.dynamic_growth_animation()
+
+    def dynamic_growth_animation(self):
+        control_growth_rate = np.log(8) / 250
+        dynamic_growth_rate = np.log(8) / 350
+        frames = 350  # Number of frames for the animation
+        update_x_values = np.linspace(
+            0, 350, frames
+        )  # Start animation from 0 seconds, up to 350 seconds
+
+        def update(frame):
+            control_y_values = np.exp(control_growth_rate * update_x_values[:frame])
+            dynamic_y_values = np.exp(dynamic_growth_rate * update_x_values[:frame])
+
+            # Clear previous data
+            self.ax.clear()
+
+            # Plot control growth curve
+            self.ax.plot(
+                update_x_values[:frame], control_y_values, label="Control Growth"
+            )
+
+            # Plot dynamic growth curve
+            self.ax.plot(
+                update_x_values[:frame], dynamic_y_values, label="Optimized Growth"
+            )
+
+            # Set axis limits and labels
+            self.ax.set_xlim(0, 500)
+            self.ax.set_ylim(0, 10)
+            self.ax.set_xlabel("Time (s)")
+            self.ax.set_ylabel("Accumulated DP")
+            self.ax.set_title("DP accumulation Prediction")
+            self.ax.legend()
+
+        ani = animation.FuncAnimation(
+            self.figure, update, frames=frames, interval=100, blit=False
         )
-        # Display the graph within the app's grid layout
-        self.graph_canvas = FigureCanvasTkAgg(self.graph_figure, master=self)
-        self.graph_canvas.draw()
-        self.graph_canvas.get_tk_widget().pack()
+        self.canvas.draw()
 
 
 class App(customtkinter.CTk):
@@ -228,8 +263,7 @@ class App(customtkinter.CTk):
             to=400,
             number_of_steps=300,
         )
-        # self.system_response_slider_1.configure(command=self.slider_command)
-        # self.system_response_slider_2.configure(command=self.slider_command)
+
         self.system_response_frame.grid(row=3, column=2, padx=(0, 0))
         self.system_response_slider_1_label = customtkinter.CTkLabel(
             self.system_response_frame,
@@ -255,43 +289,18 @@ class App(customtkinter.CTk):
         self.system_response_slider_2.grid(row=1, column=1, padx=(0, 40))
         ###################################################### END OF SLIDER CONFIGURATION ############################################
 
-        # create scrollable frame
-        # self.scrollable_frame = customtkinter.CTkScrollableFrame(
-        #     self, label_text="History Log"
-        # )
-        # self.scrollable_frame.grid(
-        #     row=1, column=2, padx=(0, 0), pady=(5, 5), sticky="n"
-        # )
-        # self.scrollable_frame.grid_columnconfigure(0, weight=1)
-        # self.log_entries = [
-        #     ("Ferric", "Flow", "DP"),
-        #     (10, 5, 50),
-        #     (15, 7, 55),
-        #     (12, 6, 52),
-        # ]
-        # for i, log_entry in enumerate(self.log_entries):
-        #     for j, value in enumerate(log_entry):
-        #         log_label = customtkinter.CTkLabel(
-        #             self.scrollable_frame, text=str(value)
-        #         )
-        #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-
-        # self.scrollable_frame.scroll_to_bottom()
-        # self.appearance_mode_optionemenu.set("System")
-
-        # self.clarifier_frame = customtkinter.CTkFrame(
-        #     self, bg_color="white", border_width=2, border_color="gray40"
-        # )
-
         self.run()
 
     def open_toplevel(self):
-        if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
-            self.toplevel_window = ToplevelWindow(
-                self
-            )  # create window if its None or destroyed
+        if self.copilot_flag.get() == "on":
+            if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+                self.toplevel_window = ToplevelWindow(
+                    self
+                )  # create window if its None or destroyed
+            else:
+                self.toplevel_window.focus()  # if window exists focus it
         else:
-            self.toplevel_window.focus()  # if window exists focus it
+            print("Predictive Control mode is not enabled.")
 
     # CREATE THE MAINLOOP FUNCTION WHICH CHECKS IF PAUSED AND THEN CHECKS IF COPILOT IS ON OR OFF BEFORE CHOOSING WHICH METHOD TO CALL
     def run(self):
@@ -373,24 +382,6 @@ class App(customtkinter.CTk):
                 self.dp.append(1.5)
                 self.time.append(self.time[-1] + 1)  # Increment the time value
 
-                # Update the log entries
-                # self.log_entries.append(
-                #     (
-                #         (
-                #             slider1_value,
-                #             round(slider2_system_response_value, ndigits=3),
-                #             self.dp[-1],
-                #         )
-                #     )
-                # )
-                # for i, log_entry in enumerate(self.log_entries):
-                #     for j, value in enumerate(log_entry):
-                #         log_label = customtkinter.CTkLabel(
-                #             self.scrollable_frame, text=str(value)
-                #         )
-                #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-                #         self.scrollable_frame.scroll_to_bottom()
-
                 ####################################################### GRAPHING OPERATIONS ##################################################
 
                 # Clear the previous graph and plot the updated data
@@ -424,22 +415,6 @@ class App(customtkinter.CTk):
                 self.dp.append(1.5)
                 self.time.append(self.time[-1] + 1)
 
-                # update log entries
-                # self.log_entries.append(
-                #     (
-                #         round(slider1_system_response_value, ndigits=3),
-                #         slider2_value,
-                #         self.dp[-1],
-                #     )
-                # )
-                # for i, log_entry in enumerate(self.log_entries):
-                #     for j, value in enumerate(log_entry):
-                #         log_label = customtkinter.CTkLabel(
-                #             self.scrollable_frame, text=str(value)
-                #         )
-                #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-                #         self.scrollable_frame.scroll_to_bottom()
-
                 ####################################################### GRAPHING OPERATIONS ######################################################################################################### GRAPHING OPERATIONS ##################################################
 
                 # Clear the previous graph and plot the updated data
@@ -472,16 +447,6 @@ class App(customtkinter.CTk):
                 ################################# Updating the screens ###################################################################################################
                 self.dp.append(1.5)
                 self.time.append(self.time[-1] + 1)  # Increment the time value
-
-                # Update the log entries
-                # self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
-                # for i, log_entry in enumerate(self.log_entries):
-                #     for j, value in enumerate(log_entry):
-                #         log_label = customtkinter.CTkLabel(
-                #             self.scrollable_frame, text=str(value)
-                #         )
-                #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-                #         self.scrollable_frame.scroll_to_bottom()
 
                 ####################################################### GRAPHING OPERATIONS ##################################################
 
@@ -529,16 +494,6 @@ class App(customtkinter.CTk):
         ################################# Updating the screens ###################################################################################################
         self.dp.append(prediction)
         self.time.append(self.time[-1] + 1)  # Increment the time value
-
-        # Update the log entries
-        # self.log_entries.append((slider1_value, slider2_value, self.dp[-1]))
-        # for i, log_entry in enumerate(self.log_entries):
-        #     for j, value in enumerate(log_entry):
-        #         log_label = customtkinter.CTkLabel(
-        #             self.scrollable_frame, text=str(value)
-        #         )
-        #         log_label.grid(row=i, column=j, padx=10, pady=(0, 10))
-        #         self.scrollable_frame.scroll_to_bottom()
 
         ####################################################### GRAPHING OPERATIONS ##################################################
 
